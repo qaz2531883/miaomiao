@@ -1,20 +1,25 @@
 <template>
 	<div class="city_body">
 		<div class="city_list">
-			<div class="city_hot">
-				<h2>热门城市</h2>
-				<ul class="clearfix">
-					<li v-for="data in cityHotList" :key="data.id">{{data.name}}</li>
-				</ul>
-			</div>
-			<div class="city_sort" ref="city_sort">
-				<div v-for="data in cityList" :key="data.index">
-					<h2>{{data.index}}</h2>
-					<ul>
-						<li v-for="item in data.list" :key="item.id">{{item.name}}</li>
-					</ul>
+			<Loading v-if="loading" />
+			<Scroller v-else ref="city_list">
+				<div>
+					<div class="city_hot">
+						<h2>热门城市</h2>
+						<ul class="clearfix">
+							<li v-for="data in cityHotList" :key="data.id" @tap='changeCity(data.name, data.id)'>{{data.name}}</li>
+						</ul>
+					</div>
+					<div class="city_sort" ref="city_sort">
+						<div v-for="data in cityList" :key="data.index">
+							<h2>{{data.index}}</h2>
+							<ul>
+								<li v-for="item in data.list" :key="item.id" @tap='changeCity(item.name, item.id)'>{{item.name}}</li>
+							</ul>
+						</div>
+					</div>
 				</div>
-			</div>
+			</Scroller>
 		</div>
 		<div class="city_index">
 			<ul>
@@ -28,14 +33,26 @@
 <script>
 	export default {
 		name: 'city',
-		data(){
+		data() {
 			return {
-				cityList : [],
-				cityHotList : []
+				cityList: [],
+				cityHotList: [],
+				loading: true
 			}
 		},
 		mounted() {
-			this.getData();
+			// 判断是否有缓存
+			var ctList = window.localStorage.getItem('cityList');
+			var ctHotList = window.localStorage.getItem('cityHotList');
+			if(ctList && ctHotList){
+				console.log()
+				this.cityList = JSON.parse(ctList);
+				this.cityHotList = JSON.parse(ctHotList);
+				this.loading = false;
+			}else{
+				this.getData();
+			}
+			
 		},
 		methods: {
 			formatCityList(cities) {
@@ -62,7 +79,7 @@
 							}]
 						});
 					}
-					
+
 					// 热门城市
 					if (cities[i].isHot == 1) {
 						cityHotList.push({
@@ -92,7 +109,10 @@
 					}
 					return false;
 				}
-				return {cityList,cityHotList};
+				return {
+					cityList,
+					cityHotList
+				};
 			},
 			getData() {
 				this.axios.get('/api/cityList').then((res) => {
@@ -100,17 +120,32 @@
 					var msg = res.data.msg;
 					if (msg === 'ok') {
 						var cities = res.data.data.cities;
-						var {cityList, cityHotList} = this.formatCityList(cities);
+						this.loading = false;
+						var {
+							cityList,
+							cityHotList
+						} = this.formatCityList(cities);
 						this.cityList = cityList;
 						this.cityHotList = cityHotList;
+						
+						// 添加缓存 value值只能是字符串 所以先转成json格式 取出的时候再转回数组
+						window.localStorage.setItem('cityList', JSON.stringify(cityList));
+						window.localStorage.setItem('cityHotList', JSON.stringify(cityHotList));
 					}
 				})
 			},
-			toIndex(index){
+			toIndex(index) {
 				var h2 = this.$refs.city_sort.getElementsByTagName('h2');
-				this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+				//this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+				this.$refs.city_list.toScrollTop(-h2[index].offsetTop);
+			},
+			changeCity(nm, id){
+				this.$store.commit('city/CHANGE_CITY', {nm, id});
+				window.localStorage.setItem('cityName', nm);
+				window.localStorage.setItem('cityId', id);
+				// 修改城市之后跳转到指定路由下
+				this.$router.push('/movie/nowPlaying')
 			}
-
 		}
 
 	}
