@@ -41,9 +41,10 @@
 		methods: {
 			getData(val) {
 				var that = this;
+				var cityId = this.$store.state.city.id;
 				// 取消上一次请求
 				this.cancelRequest();
-				this.axios.get('/api/searchList?cityId=10&kw=' + val, {
+				this.axios.get('/api/searchList?cityId=' + cityId + '&kw=' + val, {
 					cancelToken: new this.axios.CancelToken(function(c) {
 						that.source = c;
 					})

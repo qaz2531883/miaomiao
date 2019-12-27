@@ -1,69 +1,121 @@
 <template>
 	<div class="cinema_body">
-		<ul>
-			<li v-for="data in cinemas" :key="data.id">
-				<div>
-					<span>{{data.nm}}</span>
-					<span class="q"><span class="price">{{data.sellPrice}}</span> 元起</span>
-				</div>
-				<div class="address">
-					<span>{{data.addr}}</span>
-					<span>{{data.distance}}</span>
-				</div>
-				<div class="card">
-					<div v-for="(item,key) in data.tag" :key="key" v-if="item===1" :class="key | classCard">{{key | formatCard}}</div>
-				</div>
-			</li>
-		</ul>
+		<Loading v-if="loading" />
+		<Scroller v-else :handleToScroll='handleToScroll' :handleToTouchEnd='handleToTouchEnd'>
+			<ul>
+				<li class='pullDown'>{{pullDownMsg}}</li>
+				<li v-for="data in cinemas" :key="data.id">
+					<div>
+						<span>{{data.nm}}</span>
+						<span class="q"><span class="price">{{data.sellPrice}}</span> 元起</span>
+					</div>
+					<div class="address">
+						<span>{{data.addr}}</span>
+						<span>{{data.distance}}</span>
+					</div>
+					<div class="card">
+						<div v-for="(item,key) in data.tag" :key="key" v-if="item===1" :class="key | classCard">{{key | formatCard}}</div>
+					</div>
+				</li>
+			</ul>
+		</Scroller>
 	</div>
 </template>
 
 <script>
 	export default {
 		name: 'CinemaList',
-		data(){
-			return{
-				cinemas:[]
+		data() {
+			return {
+				cinemas: [],
+				pullDownMsg: '',
+				loading: true,
+				prveCityId: -1
 			}
 		},
-		mounted() {
-			this.getData();
+		activated() {
+			var cityId = this.$store.state.city.id;
+			if(this.prveCityId === cityId){
+				return;
+			}
+			this.pullDownMsg = '正在加载中';
+			this.loading = true;
+			this.getData(cityId);
 		},
-		methods:{
-			getData(){
-				this.axios.get('/api/cinemaList?cityId=10').then((res) => {
+		methods: {
+			getData(cityId) {
+				this.axios.get('/api/cinemaList?cityId=' + cityId).then((res) => {
 					var msg = res.data.msg;
-					if(msg === 'ok'){
+					if (msg === 'ok') {
 						console.log(res);
-						this.cinemas = res.data.data.cinemas;
+						this.pullDownMsg = '加载成功';
+						setTimeout(() => {
+							this.cinemas = res.data.data.cinemas;
+							this.pullDownMsg = '';
+							this.loading = false;
+							this.prveCityId = cityId;
+						}, 1000)
+
 					}
 				})
+			},
+			handleToScroll(pos) {
+				if (pos.y > 30) {
+					this.pullDownMsg = '正在更新中';
+				}
+			},
+			handleToTouchEnd(pos) {
+				if (pos.y > 30) {
+					this.getData();
+				}
 			}
 		},
-		filters:{
-			formatCard(key){
-				var card = [
-					{key: 'allowRefund', value:'改签'},
-					{key: 'endorse', value:'退'},
-					{key: 'sell', value:'折扣卡'},
-					{key: 'snack', value:'小吃'}
+		filters: {
+			formatCard(key) {
+				var card = [{
+						key: 'allowRefund',
+						value: '改签'
+					},
+					{
+						key: 'endorse',
+						value: '退'
+					},
+					{
+						key: 'sell',
+						value: '折扣卡'
+					},
+					{
+						key: 'snack',
+						value: '小吃'
+					}
 				];
 				for (var i = 0; i < card.length; i++) {
-					if(card[i].key == key){
+					if (card[i].key == key) {
 						return card[i].value;
 					}
 				}
 				return '';
 			},
-			classCard(key){
-				var card = [
-					{key: 'allowRefund', value:'or'},
-					{key: 'endorse', value:'or'},
-					{key: 'sell', value:'bl'},
-					{key: 'snack', value:'bl'}
+			classCard(key) {
+				var card = [{
+						key: 'allowRefund',
+						value: 'or'
+					},
+					{
+						key: 'endorse',
+						value: 'or'
+					},
+					{
+						key: 'sell',
+						value: 'bl'
+					},
+					{
+						key: 'snack',
+						value: 'bl'
+					}
 				];
 				for (var i = 0; i < card.length; i++) {
-					if(card[i].key == key){
+					if (card[i].key == key) {
 						return card[i].value;
 					}
 				}
@@ -74,6 +126,12 @@
 </script>
 
 <style scoped>
+	.cinema_body .pullDown {
+		margin: 0;
+		padding: 0;
+		border: none;
+	}
+
 	#content .cinema_body {
 		flex: 1;
 		overflow: auto;
