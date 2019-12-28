@@ -18,8 +18,8 @@
 				<router-view />
 			</keep-alive>
 		</div>
-
 		<Tabbar />
+		<router-view name="detail" />	
 	</div>
 </template>
 
@@ -66,7 +66,7 @@
 	}
 </script>
 
-<style>
+<style scoped>
 	#content .movie_menu {
 		width: 100%;
 		height: 45px;

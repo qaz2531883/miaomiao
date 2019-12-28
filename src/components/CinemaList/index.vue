@@ -44,13 +44,13 @@
 		},
 		methods: {
 			getData(cityId) {
-				this.axios.get('/api/cinemaList?cityId=' + cityId).then((res) => {
-					var msg = res.data.msg;
-					if (msg === 'ok') {
-						console.log(res);
+				this.axios.get('/ajax/cinemaList?cityId=' + cityId).then((res) => {
+					//console.log(res);
+					var msg = res.statusText; 
+					if (msg === 'OK') {
 						this.pullDownMsg = '加载成功';
 						setTimeout(() => {
-							this.cinemas = res.data.data.cinemas;
+							this.cinemas = res.data.cinemas;
 							this.pullDownMsg = '';
 							this.loading = false;
 							this.prveCityId = cityId;
@@ -66,7 +66,7 @@
 			},
 			handleToTouchEnd(pos) {
 				if (pos.y > 30) {
-					this.getData();
+					this.getData(this.prveCityId);
 				}
 			}
 		},

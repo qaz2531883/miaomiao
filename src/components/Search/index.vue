@@ -6,21 +6,23 @@
 				<input type="text" v-model="inputContent">
 			</div>
 		</div>
-		<div class="search_result">
-			<h3>电影/电视剧/综艺</h3>
-			<ul>
-				<li v-for="data in moviesList" :key="data.id">
-					<div class="img"><img :src="data.img | setWH('128.180')"></div>
-					<div class="info">
-						<p><span>{{data.nm}}</span><span>{{data.sc}}</span></p>
-						<p>{{data.enm}}</p>
-						<p>{{data.cat}}</p>
-						<p>{{data.rt}}</p>
-					</div>
-				</li>
+		<Scroller>
+			<div class="search_result">
+				<h3>电影/电视剧/综艺</h3>
+				<ul>
+					<li v-for="data in moviesList" :key="data.id" @tap='toDetail(data.id)'>
+						<div class="img"><img :src="data.img | setWH('128.180')"></div>
+						<div class="info">
+							<p><span>{{data.nm}}</span><span>{{data.sc}}</span></p>
+							<p>{{data.enm}}</p>
+							<p>{{data.cat}}</p>
+							<p>{{data.rt}}</p>
+						</div>
+					</li>
 
-			</ul>
-		</div>
+				</ul>
+			</div>
+		</Scroller>
 	</div>
 </template>
 
@@ -49,6 +51,7 @@
 						that.source = c;
 					})
 				}).then((res) => {
+					console.log(res);
 					var msg = res.data.msg;
 					var movies = res.data.data.movies;
 					if (msg === 'ok' && movies) {
@@ -67,6 +70,9 @@
 				if (typeof this.source === 'function') {
 					this.source('终止请求')
 				}
+			},
+			toDetail(id) {
+				this.$router.push('/movie/detail/search/' + id);
 			}
 		}
 

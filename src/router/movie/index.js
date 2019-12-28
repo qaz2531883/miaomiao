@@ -18,6 +18,36 @@ export default {
 			component: () => import('@/components/Search')
 		},
 		{
+			path: 'detail/now/:movieID',
+			components: {
+				default : () => import('@/components/NowPlaying'),
+				detail: () => import('@/views/movie/detail')
+			},
+			props : {
+				detail : true
+			}
+		},
+		{
+			path: 'detail/com/:movieID',
+			components: {
+				default : () => import('@/components/ComingSoon'),
+				detail: () => import('@/views/movie/detail')
+			},
+			props : {
+				detail : true
+			}
+		},
+		{
+			path: 'detail/search/:movieID',
+			components: {
+				default : () => import('@/components/Search'),
+				detail: () => import('@/views/movie/detail')
+			},
+			props : {
+				detail : true
+			}
+		},
+		{
 			path: '/movie',
 			redirect: '/movie/nowPlaying'
 		}
