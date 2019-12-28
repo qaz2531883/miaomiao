@@ -4,7 +4,7 @@
 		<Scroller v-else :handleToScroll='handleToScroll' :handleToTouchEnd='handleToTouchEnd'>
 			<ul>
 				<li class='pullDown'>{{pullDownMsg}}</li>
-				<li v-for="data in movieList" :key="data.id">
+				<li v-for="data in movieList" :key="data.id" @tap='toDetail(data.id)'>
 					<div class="pic_show"><img :src="data.img | setWH('128.180')"></div>
 					<div class="info_list">
 						<h2>{{data.nm}} <img v-if="data.version" src="@/assets/maxs.png" /> </h2>
@@ -43,20 +43,21 @@
 		},
 		methods: {
 			getData(cityId) {
-				this.axios.get('/api/movieOnInfoList?cityId=' + cityId).then((res) => {
-					console.log(res);
-					var msg = res.data.msg;
-					if (msg === 'ok') {
+				this.axios.get('/ajax/movieOnInfoList?cityId=' + cityId).then((res) => {
+					//console.log(res);
+					//var msg = res.data.msg;
+					var msg = res.statusText;
+					if (msg === 'OK') {
 						this.pullDownMsg = '加载成功';
 						setTimeout(() => {
-							this.movieList = res.data.data.movieList;
+							this.movieList = res.data.movieList;
 							this.pullDownMsg = '';
 							this.loading = false;
 							this.prveCityId = cityId;
 						}, 1000)
 						// 界面渲染完成之后执行的回调
 						this.$nextTick(() => {
-							console.log('界面渲染完成之后执行的回调');
+							//console.log('界面渲染完成之后执行的回调');
 						})
 					}
 				})
@@ -68,9 +69,14 @@
 			},
 			handleToTouchEnd(pos) {
 				if (pos.y > 30) {
-					this.getData();
+					this.getData(this.prveCityId);
 				}
+			},
+			toDetail(id){
+				//console.log(id);
+				this.$router.push('/movie/detail/now/' + id);
 			}
+			
 		}
 	}
 </script>

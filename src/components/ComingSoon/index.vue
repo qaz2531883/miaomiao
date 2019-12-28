@@ -4,7 +4,7 @@
 		<Scroller v-else :handleToScroll='handleToScroll' :handleToTouchEnd='handleToTouchEnd'>
 			<ul>
 				<li class='pullDown'>{{pullDownMsg}}</li>
-				<li v-for="data in comingList" :key="data.id">
+				<li v-for="data in comingList" :key="data.id" @tap='toDetail(data.id)'>
 					<div class="pic_show"><img :src="data.img | setWH('128.180')"></div>
 					<div class="info_list">
 						<h2>{{data.nm}} <img v-if="data.version" src="@/assets/maxs.png" /> </h2>
@@ -43,13 +43,13 @@
 		},
 		methods: {
 			getData(cityId) {
-				this.axios.get('/api/movieComingList?cityId=' + cityId).then((res) => {
-					console.log(res);
-					var msg = res.data.msg;
-					if (msg === 'ok') {
+				this.axios.get('/ajax/comingList?ci=1&limit=10&token=&cityId=' + cityId).then((res) => {
+					//console.log(res);
+					var msg = res.statusText;
+					if (msg === 'OK') {
 						this.pullDownMsg = '加载成功';
 						setTimeout(() => {
-							this.movieList = res.data.data.movieList;
+							this.comingList = res.data.coming;
 							this.pullDownMsg = '';
 							this.loading = false;
 							this.prveCityId = cityId;
@@ -64,8 +64,12 @@
 			},
 			handleToTouchEnd(pos) {
 				if (pos.y > 30) {
-					this.getData();
+					this.getData(this.prveCityId);
 				}
+			},
+			toDetail(id){
+				//console.log(id);
+				this.$router.push('/movie/detail/com/' + id);
 			}
 		}
 	}
